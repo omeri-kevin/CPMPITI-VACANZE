@@ -1,0 +1,7 @@
+<h1>La tua collezione:</h1>
+<ul>
+    {% for carta, rarita in collezione %}
+        <li>{{ carta }} ({{ rarita }})</li>
+    {% endfor %}
+</ul>
+<a href="{{ url_for('menu_principale') }}">Torna al Menu</a>

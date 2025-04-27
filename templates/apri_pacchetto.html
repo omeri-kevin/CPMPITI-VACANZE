@@ -1,0 +1,7 @@
+<h1>Hai aperto un pacchetto!</h1>
+<ul>
+    {% for carta, rarita in pacchetto %}
+        <li>{{ carta }} ({{ rarita }})</li>
+    {% endfor %}
+</ul>
+<a href="{{ url_for('menu_principale') }}">Torna al Menu</a>
