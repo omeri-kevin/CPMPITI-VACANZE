@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Menu Principale</title>
+</head>
+<body>
+    <h1>Benvenuto!</h1>
+    <p>Punti disponibili: {{ punti }}</p>
+    <form action="{{ url_for('apri_pacchetto') }}" method="POST">
+        <button type="submit">Apri Pacchetto (10 punti)</button>
+    </form>
+    <a href="{{ url_for('mostra_collezione') }}">Mostra Collezione</a>
+</body>
+</html>

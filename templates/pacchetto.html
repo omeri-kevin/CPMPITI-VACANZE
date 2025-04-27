@@ -1,15 +1,16 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Collezione</title>
+    <title>Pacchetto Aperto</title>
 </head>
 <body>
-    <h1>La tua Collezione</h1>
+    <h1>Hai aperto un pacchetto!</h1>
     <ul>
-        {% for carta in collezione %}
+        {% for carta in pacchetto %}
             <li>{{ carta.nome }} ({{ carta.rarita }})</li>
         {% endfor %}
     </ul>
+    <p>Punti attuali: {{ punti }}</p>
     <a href="{{ url_for('menu_principale') }}">Torna al Menu</a>
 </body>
 </html>

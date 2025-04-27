@@ -1,49 +1,25 @@
-from flask import Flask, render_template, request, redirect, url_for, session
+from flask import Flask, render_template, request, redirect, url_for
 import random
-import os
-import csv
 
 app = Flask(__name__)
-app.secret_key = 'supersecretkey'  
 
-
-def carica_pokemon():
-    pokedex = {
-        "Comune": [],
-        "Non Comune": [],
-        "Rara": [],
-        "Ultra Rara": []
-    }
-    
-    
-    if not os.path.exists("pokemon (1).csv"):
-        print("Errore: Il file 'pokemon (1).csv' non è stato trovato.")
-        return pokedex  
-
- 
-    with open("pokemon (1).csv", "r", encoding="utf-8") as file:
-        reader = csv.DictReader(file)
-        for riga in reader:
-            if "Nome" in riga and "Rarità" in riga:   
-                nome_pokemon = riga["Nome"]
-                rarita_pokemon = riga["Rarità"]
-                if rarita_pokemon in pokedex:  
-                    pokedex[rarita_pokemon].append(nome_pokemon)
-            else:
-                print("Errore: Colonne mancanti nel file CSV.")
-                break  
-
-    return pokedex
-
-
-pokedex = carica_pokemon()
-
+pokedex = {
+    "Comune": ["Bulbasaur", "Charmander", "Squirtle", "Eevee", "Snorlax"],
+    "Non Comune": ["Gengar", "Dragonite", "Cyndaquil", "Umbreon", "Piplup"],
+    "Rara": ["Pikachu", "Togepi", "Ampharos", "Latios", "Garchomp"],
+    "Ultra Rara": ["Mewtwo"]
+}
 
 valori_punti = {
     "Comune": 1,
     "Non Comune": 3,
     "Rara": 7,
     "Ultra Rara": 15
+}
+
+giocatore = {
+    "punti": 100,
+    "collezione": []
 }
 
 def pesca_carta():
@@ -57,45 +33,35 @@ def pesca_carta():
     else:
         rarita = "Comune"
 
-    if pokedex[rarita]:
-        return random.choice(pokedex[rarita]), rarita
-    else:
-        return None, None
-
-
+    if len(pokedex[rarita]) > 0:
+        carta = random.choice(pokedex[rarita])
+        return carta, rarita
+    return None, None
 
 @app.route("/")
 def menu_principale():
-    if 'punti' not in session:
-        session['punti'] = 100
-        session['collezione'] = []
-    return render_template("index.html")
+    return render_template("menu.html", punti=giocatore["punti"])
 
-@app.route("/apri_pacchetto")
+@app.route("/apri_pacchetto", methods=["POST"])
 def apri_pacchetto():
-    if session['punti'] < 10:
-        return redirect(url_for('menu_principale'))
+    if giocatore["punti"] < 10:
+        return redirect(url_for("menu_principale"))
 
-    session['punti'] -= 10
-    nuovo_pacchetto = []
+    giocatore["punti"] -= 10
+    pacchetto = []
 
     for _ in range(5):
         carta, rarita = pesca_carta()
         if carta:
-            session['collezione'].append([carta, rarita])
-            session['punti'] += valori_punti[rarita]
-            nuovo_pacchetto.append((carta, rarita))
+            giocatore["collezione"].append({"nome": carta, "rarita": rarita})
+            giocatore["punti"] += valori_punti[rarita]
+            pacchetto.append({"nome": carta, "rarita": rarita})
 
-    session.modified = True
-    return render_template("apri_pacchetto.html", pacchetto=nuovo_pacchetto)
+    return render_template("pacchetto.html", pacchetto=pacchetto, punti=giocatore["punti"])
 
 @app.route("/collezione")
 def mostra_collezione():
-    return render_template("collezione.html", collezione=session.get('collezione', []))
-
-@app.route("/punti")
-def mostra_punti():
-    return render_template("punti.html", punti=session.get('punti', 0))
+    return render_template("collezione.html", collezione=giocatore["collezione"])
 
 if __name__ == "__main__":
     app.run(debug=True)
