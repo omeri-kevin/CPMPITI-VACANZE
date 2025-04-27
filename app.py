@@ -1,5 +1,6 @@
 from flask import Flask, render_template, request, redirect, url_for, session
 import random
+import os
 import csv
 
 app = Flask(__name__)
@@ -13,18 +14,25 @@ def carica_pokemon():
         "Rara": [],
         "Ultra Rara": []
     }
-    try:
-        with open("pokemon (1).csv", "r", encoding="utf-8") as file:
-            reader = csv.DictReader(file)   
-            for row in reader:
-                nome = row["Nome"]
-                rarita = row["Rarità"]
-                if rarita in pokedex:
-                    pokedex[rarita].append(nome)
-    except FileNotFoundError:
+    
+    
+    if not os.path.exists("pokemon (1).csv"):
         print("Errore: Il file 'pokemon (1).csv' non è stato trovato.")
-    except Exception as e:
-        print(f"Errore durante la lettura del file: {e}")
+        return pokedex  
+
+ 
+    with open("pokemon (1).csv", "r", encoding="utf-8") as file:
+        reader = csv.DictReader(file)
+        for riga in reader:
+            if "Nome" in riga and "Rarità" in riga:   
+                nome_pokemon = riga["Nome"]
+                rarita_pokemon = riga["Rarità"]
+                if rarita_pokemon in pokedex:  
+                    pokedex[rarita_pokemon].append(nome_pokemon)
+            else:
+                print("Errore: Colonne mancanti nel file CSV.")
+                break  
+
     return pokedex
 
 
