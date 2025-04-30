@@ -12,9 +12,9 @@ pokedex = {
 
 valori_punti = {
     "Comune": 1,
-    "Non Comune": 3,
-    "Rara": 7,
-    "Ultra Rara": 15
+    "Non Comune": 2,
+    "Rara": 3,
+    "Ultra Rara": 10,
 }
 
 giocatore = {
