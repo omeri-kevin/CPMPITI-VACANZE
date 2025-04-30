@@ -14,9 +14,10 @@ valori_punti = {
     "Ultra Rara": 10,
 }
 
+collezione = []
+
 giocatore = {
-    "punti": 100,
-    "collezione": []
+    "punti": 100
 }
 
 def pesca_carta():
@@ -30,9 +31,7 @@ def pesca_carta():
     else:
         rarita = "Comune"
     
-    
     carta = random.choice(dataframe["nome"].tolist()) 
-    
     return carta, rarita
 
 @app.route("/")
@@ -50,7 +49,7 @@ def apri_pacchetto():
     for i in range(5):
         carta, rarita = pesca_carta()
         if carta:
-            giocatore["collezione"].append({"nome": carta, "rarita": rarita})
+            collezione.append({"nome": carta, "rarita": rarita})  
             giocatore["punti"] += valori_punti[rarita]
             pacchetto.append({"nome": carta, "rarita": rarita})
 
@@ -58,7 +57,7 @@ def apri_pacchetto():
 
 @app.route("/collezione")
 def mostra_collezione():
-    return render_template("collezione.html", collezione=giocatore["collezione"])
+    return render_template("collezione.html", collezione=collezione)  
 
 if __name__ == "__main__":
     app.run(debug=True)
