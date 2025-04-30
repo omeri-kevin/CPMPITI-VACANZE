@@ -1,4 +1,4 @@
-from flask import Flask, render_template, redirect, url_for
+from flask import Flask, render_template, redirect, url_for, request
 import random
 import pandas as pd
 
@@ -34,30 +34,29 @@ def pesca_carta():
     carta = random.choice(dataframe["nome"].tolist()) 
     return carta, rarita
 
-@app.route("/")
-def menu_principale():
-    return render_template("menu.html", punti=giocatore["punti"])
+@app.route("/", methods=["GET", "POST"])
+def index():
+    if request.method == "POST":
+        if giocatore["punti"] < 10:
+            return render_template("index.html", punti=giocatore["punti"], collezione=collezione, pacchetto=None, errore="Punti insufficienti!")
+        
+        giocatore["punti"] -= 10
+        pacchetto = []
 
-@app.route("/apri_pacchetto", methods=["POST"])
-def apri_pacchetto():
-    if giocatore["punti"] < 10:
-        return redirect(url_for("menu_principale"))
+        for i in range(5):
+            carta, rarita = pesca_carta()
+            if carta:
+                collezione.append({"nome": carta, "rarita": rarita})
+                giocatore["punti"] += valori_punti[rarita]
+                pacchetto.append({"nome": carta, "rarita": rarita})
 
-    giocatore["punti"] -= 10
-    pacchetto = []
+        return render_template("index.html", punti=giocatore["punti"], collezione=collezione, pacchetto=pacchetto, errore=None)
 
-    for i in range(5):
-        carta, rarita = pesca_carta()
-        if carta:
-            collezione.append({"nome": carta, "rarita": rarita})  
-            giocatore["punti"] += valori_punti[rarita]
-            pacchetto.append({"nome": carta, "rarita": rarita})
-
-    return render_template("pacchetto.html", pacchetto=pacchetto, punti=giocatore["punti"])
+    return render_template("index.html", punti=giocatore["punti"], collezione=collezione, pacchetto=None, errore=None)
 
 @app.route("/collezione")
 def mostra_collezione():
     return render_template("collezione.html", collezione=collezione)  
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(debug=True, port=5000)
