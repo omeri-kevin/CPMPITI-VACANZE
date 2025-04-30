@@ -1,14 +1,11 @@
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, render_template, redirect, url_for
 import random
+import pandas as pd
 
 app = Flask(__name__)
 
-pokedex = {
-    "Comune": ["Bulbasaur", "Charmander", "Squirtle", "Eevee", "Snorlax"],
-    "Non Comune": ["Gengar", "Dragonite", "Cyndaquil", "Umbreon", "Piplup"],
-    "Rara": ["Pikachu", "Togepi", "Ampharos", "Latios", "Garchomp"],
-    "Ultra Rara": ["Mewtwo"]
-}
+dataframe = pd.read_csv("pokemon (1).csv")
+dataframe.columns = dataframe.columns.str.lower().str.normalize('NFKD').str.encode('ascii', errors='ignore').str.decode('utf-8')
 
 valori_punti = {
     "Comune": 1,
@@ -32,10 +29,15 @@ def pesca_carta():
         rarita = "Non Comune"
     else:
         rarita = "Comune"
-
-    if len(pokedex[rarita]) > 0:
-        carta = random.choice(pokedex[rarita])
+    
+    # Filtra le carte per rarità
+    carte_disponibili = dataframe[dataframe['rarita'].str.lower() == rarita.lower()]
+    
+    if not carte_disponibili.empty:
+        # Seleziona una carta casuale
+        carta = random.choice(carte_disponibili['nome'].tolist())
         return carta, rarita
+    
     return None, None
 
 @app.route("/")
