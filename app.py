@@ -30,15 +30,10 @@ def pesca_carta():
     else:
         rarita = "Comune"
     
-    # Filtra le carte per rarità
-    carte_disponibili = dataframe[dataframe['rarita'].str.lower() == rarita.lower()]
     
-    if not carte_disponibili.empty:
-        # Seleziona una carta casuale
-        carta = random.choice(carte_disponibili['nome'].tolist())
-        return carta, rarita
+    carta = random.choice(dataframe["nome"].tolist()) 
     
-    return None, None
+    return carta, rarita
 
 @app.route("/")
 def menu_principale():
