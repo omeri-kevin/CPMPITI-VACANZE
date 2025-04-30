@@ -50,7 +50,7 @@ def apri_pacchetto():
     giocatore["punti"] -= 10
     pacchetto = []
 
-    for _ in range(5):
+    for i in range(5):
         carta, rarita = pesca_carta()
         if carta:
             giocatore["collezione"].append({"nome": carta, "rarita": rarita})
