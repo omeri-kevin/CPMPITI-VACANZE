@@ -5,7 +5,7 @@ import pandas as pd
 app = Flask(__name__)
 
 dataframe = pd.read_csv("pokemon (1).csv")
-dataframe.columns = dataframe.columns.str.lower().str.normalize('NFKD').str.encode('ascii', errors='ignore').str.decode('utf-8')
+dataframe.columns = dataframe.columns.str.lower()
 
 valori_punti = {
     "Comune": 1,
@@ -15,10 +15,7 @@ valori_punti = {
 }
 
 collezione = []
-
-giocatore = {
-    "punti": 100
-}
+giocatore = {"punti": 100, "collezione": []}
 
 def pesca_carta():
     probabilita = random.randint(1, 100)
@@ -31,32 +28,36 @@ def pesca_carta():
     else:
         rarita = "Comune"
     
-    carta = random.choice(dataframe["nome"].tolist()) 
-    return carta, rarita
+    carte_disponibili = dataframe[dataframe["rarità"] == rarita]
+    if not carte_disponibili.empty:
+        carta = random.choice(carte_disponibili["nome"].tolist())
+        return carta, rarita
+    return None, None
 
-@app.route("/", methods=["GET", "POST"])
-def index():
-    if request.method == "POST":
-        if giocatore["punti"] < 10:
-            return render_template("index.html", punti=giocatore["punti"], collezione=collezione, pacchetto=None, errore="Punti insufficienti!")
-        
-        giocatore["punti"] -= 10
-        pacchetto = []
+@app.route("/")
+def menu_principale():
+    return render_template("menu.html", punti=giocatore["punti"])
 
-        for i in range(5):
-            carta, rarita = pesca_carta()
-            if carta:
-                collezione.append({"nome": carta, "rarita": rarita})
-                giocatore["punti"] += valori_punti[rarita]
-                pacchetto.append({"nome": carta, "rarita": rarita})
+@app.route("/apri_pacchetto", methods=["POST"])
+def apri_pacchetto():
+    if giocatore["punti"] < 10:
+        return redirect(url_for("menu_principale"))
+    
+    giocatore["punti"] -= 10
+    pacchetto = []
 
-        return render_template("index.html", punti=giocatore["punti"], collezione=collezione, pacchetto=pacchetto, errore=None)
+    for _ in range(5):
+        carta, rarita = pesca_carta()
+        if carta:
+            collezione.append({"nome": carta, "rarita": rarita})
+            giocatore["punti"] += valori_punti[rarita]
+            pacchetto.append({"nome": carta, "rarita": rarita})
 
-    return render_template("index.html", punti=giocatore["punti"], collezione=collezione, pacchetto=None, errore=None)
+    return render_template("pacchetto.html", pacchetto=pacchetto, punti=giocatore["punti"])
 
 @app.route("/collezione")
 def mostra_collezione():
-    return render_template("collezione.html", collezione=collezione)  
+    return render_template("collezione.html", collezione=collezione)
 
 if __name__ == "__main__":
-    app.run(debug=True, port=5000)
+    app.run(debug=True)
